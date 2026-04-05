@@ -56,7 +56,7 @@ YOGATOOLS_MCP_ENABLED=true
 YOGATOOLS_MCP_MODE=enabled
 
 # Format recommande
-YOGATOOLS_MCP_CALLERS=[{"name":"muneo","token":"<token>","accounts":["*"]}]
+YOGATOOLS_MCP_CALLERS=[{"name":"muneo","token":"<token>","accounts":["acc_123"]}]
 
 # Fallback legacy
 YOGATOOLS_MCP_INTERNAL_TOKEN=
@@ -67,6 +67,7 @@ Notes :
 - `YOGATOOLS_MCP_MODE=shadow` active les controles mais n'execute pas les tools d'ecriture.
 - `YOGATOOLS_MCP_MODE=disabled` desactive le serveur.
 - `YOGATOOLS_MCP_CALLERS` permet de scoper chaque caller a une liste de comptes.
+- en production, privilegiez des `accountId` explicites plutot qu'un scope global `["*"]`.
 
 ## Authentification
 
@@ -258,3 +259,30 @@ Le serveur est adapte aux clients MCP capables de parler **Streamable HTTP**, pa
 - Muneo
 - agents custom Node.js
 - tout client base sur le SDK officiel MCP
+
+Si votre client ne supporte pas les headers custom ou le transport Streamable HTTP, il faudra ajouter une petite couche d'adaptation.
+
+## Conseils d'integration
+
+- commencez par `listTools()` pour decouvrir les tools disponibles
+- utilisez un caller scope a un ou plusieurs `accountId` precis plutot qu'un token global
+- envoyez `confirm: true` uniquement sur les actions que vous voulez vraiment executer
+- generez un `idempotencyKey` unique pour chaque creation ou envoi sensible
+- parsez le contenu texte JSON retourne par `tools/call`
+
+## Limites actuelles
+
+- pas de resources MCP
+- pas de prompts MCP
+- pas de WebSocket ni stdio dans cette implementation
+- le serveur est pense pour des integrations service-to-service securisees
+
+## Support
+
+Si vous integrez le serveur MCP YogaTools dans un client ou un agent, les points les plus frequents a verifier sont :
+
+- token MCP invalide ou absent
+- `X-MCP-Internal: true` manquant
+- module MCP non active
+- `accountId` manquant dans les arguments
+- `confirm: true` ou `idempotencyKey` oublies sur certains tools
